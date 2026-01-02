@@ -1,0 +1,19 @@
+{
+  "services": [
+    {
+      "tag": "Kitchens",
+      "title": "Full kitchen renovation",
+      "description": "Cabinetry, counters, tile, lighting, plumbing coordination, and appliance fit."
+    },
+    {
+      "tag": "Baths",
+      "title": "Bathroom remodeling",
+      "description": "Waterproofing, tile, fixtures, accessibility upgrades, and ventilation fixes."
+    },
+    {
+      "tag": "Carpentry",
+      "title": "Custom carpentry",
+      "description": "Built-ins, closet systems, trim, and cabinet refacing to refresh existing spaces."
+    }
+  ]
+}

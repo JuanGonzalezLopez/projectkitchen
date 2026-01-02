@@ -1,0 +1,16 @@
+{
+  "projects": [
+    {
+      "slug": "kitchen-refresh",
+      "name": "Old San Juan Kitchen",
+      "manifest": "assets/projects/kitchen-refresh/manifest.json",
+      "basePath": "assets/projects/kitchen-refresh/"
+    },
+    {
+      "slug": "kitchen-refresher",
+      "name": "Old San Juan Kitchen 2",
+      "manifest": "assets/projects/kitchen-refresher/manifest.json",
+      "basePath": "assets/projects/kitchen-refresher/"
+    }
+  ]
+}

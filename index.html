@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>[Business Name] | Kitchens & Remodeling in Puerto Rico</title>
+  <meta name="description" content="Clean, trusted home remodeling: kitchens, baths, and carpentry across Puerto Rico.">
+  <meta name="theme-color" content="#1f3b2c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container nav">
+      <div class="brand">[Business Name]</div>
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav aria-label="Main navigation" id="navMenu">
+        <a href="#services">Services</a>
+        <a href="#projects">Projects</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <a class="btn" href="#contact">Get a quote</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow" id="heroEyebrow"></div>
+          <h1 id="heroHeadline"></h1>
+          <p id="heroSubhead"></p>
+          <div class="hero-actions">
+            <a class="btn light" href="#contact" id="heroCtaPrimary"></a>
+            <span class="pill" id="heroCtaSecondary"></span>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-top">
+            <div>
+              <div class="small-label">Latest kitchen</div>
+              <div class="hero-card-title" id="projectTitle">Old San Juan Kitchen</div>
+            </div>
+            <span class="pill soft" id="projectCount">3 photos</span>
+          </div>
+          <p><strong>Location:</strong> <span id="projectLocation">San Juan, PR</span></p>
+          <p><strong>Scope:</strong> <span id="projectScope">Custom cabinets, quartz counters, under-cabinet lighting</span></p>
+          <p class="muted small">Want this for your space? Tap “Request a walkthrough” and we’ll schedule a visit.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="services" class="section container">
+      <div class="section-head">
+        <div class="section-label">What we do</div>
+        <h2>Kitchens, baths, and built-ins crafted to last.</h2>
+        <p class="muted">We plan, protect your home during work, and leave clean finishes that photograph well.</p>
+      </div>
+      <div class="grid cards" id="servicesGrid"></div>
+    </section>
+
+    <section id="projects" class="section container">
+      <div class="section-head">
+        <div class="section-label">Featured work</div>
+        <h2 id="projectsHeading">Featured projects</h2>
+        <p class="muted small">Add project folders + manifests to update automatically.</p>
+      </div>
+      <div class="card carousel">
+        <div class="carousel-window" id="carouselWindow">
+          <div class="carousel-track" id="carouselTrack"></div>
+          <button class="carousel-edge left" id="prevSlide" aria-label="Previous photo"></button>
+          <button class="carousel-edge right" id="nextSlide" aria-label="Next photo"></button>
+        </div>
+        <div class="carousel-controls">
+          <div class="dots" id="carouselDots" aria-label="Carousel indicators"></div>
+        </div>
+        <div class="muted small carousel-caption" id="carouselCaption"></div>
+      </div>
+      <div class="project-list" id="projectList" aria-label="Projects list"></div>
+    </section>
+
+    <section id="about" class="section container">
+      <div class="section-head">
+        <div class="section-label">About</div>
+        <h2 id="aboutHeading"></h2>
+        <p class="muted" id="aboutSubhead"></p>
+      </div>
+      <div class="grid icons" id="aboutPillars"></div>
+    </section>
+
+    <section id="contact" class="section container">
+      <div class="section-head">
+        <div class="section-label">Contact</div>
+        <h2 id="contactHeading"></h2>
+        <p class="muted" id="contactSubhead"></p>
+      </div>
+      <div class="contact">
+        <div class="card contact-card">
+          <div class="contact-meta">
+            <div>
+              <div class="small-label">Call or email</div>
+              <div class="contact-row"><strong>Phone:</strong> <a href="tel:+17871234567">+1 (787) 123-4567</a></div>
+              <div class="contact-row"><strong>Email:</strong> <a href="mailto:info@example.com">info@example.com</a></div>
+            </div>
+            <span class="pill soft">Service area: Metro PR</span>
+          </div>
+          <form id="contactForm" action="https://formspree.io/f/{your-form-id}" method="post">
+            <label>Name
+              <input id="name" name="name" autocomplete="name" required>
+            </label>
+            <label>Phone
+              <input id="phone" name="phone" autocomplete="tel" required>
+            </label>
+            <label>Project details
+              <textarea id="message" name="message" rows="4" required></textarea>
+            </label>
+            <button class="btn" type="submit">Send message</button>
+            <p class="muted small">We only use your details to respond to this inquiry. Replace the form action with your endpoint; no API keys are stored here.</p>
+          </form>
+        </div>
+        <div class="card contact-steps">
+          <h3>How we work</h3>
+          <ul>
+            <li>On-site walkthrough and measurements</li>
+            <li>Transparent proposal with allowances</li>
+            <li>Dust protection, daily cleanup, photo updates</li>
+            <li>Final punch list and handoff walkthrough</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      © <span id="year"></span> [Business Name] — Puerto Rico. Crafted with care.
+    </div>
+  </footer>
+
+  <script>
+    const navToggle = document.querySelector('.nav-toggle');
+    const navMenu = document.getElementById('navMenu');
+    navToggle.addEventListener('click', () => {
+      const isOpen = navMenu.classList.toggle('open');
+      navToggle.classList.toggle('open', isOpen);
+      navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+    document.addEventListener('click', (e) => {
+      if (!navMenu.contains(e.target) && !navToggle.contains(e.target)) {
+        navMenu.classList.remove('open');
+        navToggle.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.querySelectorAll('#navMenu a').forEach(link => {
+      link.addEventListener('click', () => {
+        navMenu.classList.remove('open');
+        navToggle.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    const defaultContent = {
+      hero: {
+        eyebrow: 'Puerto Rico • Kitchens • Baths • Carpentry',
+        headline: 'Beautiful, durable remodeling delivered with care.',
+        subhead: 'From concept to punch list, we handle cabinetry, counters, tile, lighting, and finishes with clear communication.',
+        ctaPrimary: 'Request a walkthrough',
+        ctaSecondary: 'Licensed & insured • Local crew'
+      },
+      about: {
+        heading: 'Local crew. Licensed, insured, and hands-on.',
+        subhead: 'We serve the San Juan metro and nearby towns with clear timelines, dust protection, and site clean-up daily.',
+        pillars: [
+          { title: 'Predictable schedules', description: 'We lock scope, sequence trades, and share weekly updates so you always know next steps.' },
+          { title: 'Detail-focused', description: 'Tight reveals, durable hardware, careful tile layout, and clean edges on every project.' },
+          { title: 'Protected homes', description: 'Floor protection, sealed work areas, and insured team members to keep your home safe.' }
+        ]
+      },
+      contact: {
+        heading: 'Tell us about your space.',
+        subhead: 'We reply within one business day. Replace the form action with your Formspree or Netlify Forms endpoint to receive submissions.'
+      }
+    };
+
+    const defaultServices = {
+      services: [
+        { tag: 'Kitchens', title: 'Full kitchen renovation', description: 'Cabinetry, counters, tile, lighting, plumbing coordination, and appliance fit.' },
+        { tag: 'Baths', title: 'Bathroom remodeling', description: 'Waterproofing, tile, fixtures, accessibility upgrades, and ventilation fixes.' },
+        { tag: 'Carpentry', title: 'Custom carpentry', description: 'Built-ins, closet systems, trim, and cabinet refacing to refresh existing spaces.' }
+      ]
+    };
+
+    const defaultProjects = {
+      projects: [
+        {
+          slug: 'kitchen-refresh',
+          name: 'Old San Juan Kitchen',
+          manifest: 'assets/projects/kitchen-refresh/manifest.json',
+          basePath: 'assets/projects/kitchen-refresh/'
+        }
+      ]
+    };
+
+    const defaultManifest = {
+      title: 'Old San Juan Kitchen',
+      location: 'San Juan, PR',
+      description: 'Custom cabinets, quartz counters, under-cabinet lighting, and built-in storage.',
+      images: [
+        { src: 'kitchen-1.png', alt: 'Remodeled kitchen with waterfall island and warm wood cabinets' },
+        { src: 'kitchen-2.png', alt: 'Remodeled kitchen with quartz counters and new lighting' },
+        { src: 'kitchen-3.png', alt: 'Built-in shelving and finished trim in remodeled kitchen' }
+      ]
+    };
+
+    const yearEl = document.getElementById('year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    const loadJSON = async (path, fallback) => {
+      try {
+        const res = await fetch(`${path}?v=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`Failed to load ${path}`);
+        return await res.json();
+      } catch (e) {
+        console.warn(`Using fallback for ${path}: ${e.message}. Serve over http (python -m http.server) to avoid file:// fetch limits.`);
+        return fallback;
+      }
+    };
+
+    const renderContent = (content) => {
+      document.getElementById('heroEyebrow').textContent = content.hero.eyebrow;
+      document.getElementById('heroHeadline').textContent = content.hero.headline;
+      document.getElementById('heroSubhead').textContent = content.hero.subhead;
+      document.getElementById('heroCtaPrimary').textContent = content.hero.ctaPrimary;
+      document.getElementById('heroCtaSecondary').textContent = content.hero.ctaSecondary;
+
+      document.getElementById('aboutHeading').textContent = content.about.heading;
+      document.getElementById('aboutSubhead').textContent = content.about.subhead;
+      const pillarsEl = document.getElementById('aboutPillars');
+      pillarsEl.innerHTML = '';
+      content.about.pillars.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'icon-card';
+        card.innerHTML = `
+          <div>
+            <h3>${p.title}</h3>
+            <p class="muted">${p.description}</p>
+          </div>
+        `;
+        pillarsEl.appendChild(card);
+      });
+
+      document.getElementById('contactHeading').textContent = content.contact.heading;
+      document.getElementById('contactSubhead').textContent = content.contact.subhead;
+    };
+
+    const renderServices = (servicesData) => {
+      const grid = document.getElementById('servicesGrid');
+      grid.innerHTML = '';
+      servicesData.services.forEach(service => {
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="pill soft">${service.tag}</div>
+          <h3>${service.title}</h3>
+          <p>${service.description}</p>
+        `;
+        grid.appendChild(card);
+      });
+    };
+
+    const carouselTrack = document.getElementById('carouselTrack');
+    const carouselDots = document.getElementById('carouselDots');
+    const carouselCaption = document.getElementById('carouselCaption');
+    const projectListEl = document.getElementById('projectList');
+    const windowEl = document.getElementById('carouselWindow');
+    const prevBtn = document.getElementById('prevSlide');
+    const nextBtn = document.getElementById('nextSlide');
+
+    let projects = [];
+    let currentProjectIndex = 0;
+    let currentImageIndex = 0;
+    let autoplayTimer = null;
+    let lastInteraction = Date.now();
+
+    const setHeroProjectSummary = (project) => {
+      document.getElementById('projectTitle').textContent = project.title;
+      document.getElementById('projectLocation').textContent = project.location || '';
+      document.getElementById('projectScope').textContent = project.description || '';
+      document.getElementById('projectCount').textContent = `${project.images.length} photos`;
+    };
+
+    const buildProjectList = () => {
+      projectListEl.innerHTML = '';
+      projects.forEach((project, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'project-pill';
+        btn.type = 'button';
+        btn.setAttribute('aria-label', `View project ${project.title}`);
+        btn.textContent = project.title;
+        btn.addEventListener('click', () => {
+          currentProjectIndex = idx;
+          currentImageIndex = 0;
+          renderCarousel();
+          resetAutoplay();
+        });
+        projectListEl.appendChild(btn);
+      });
+    };
+
+    const buildSlides = () => {
+      carouselTrack.innerHTML = '';
+      projects.forEach((project, pIdx) => {
+        project.images.forEach((image, iIdx) => {
+          const resolvedSrc = image.src.startsWith('http') ? image.src : `${project.basePath || ''}${image.src}`;
+          const resolvedWebp = image.webp ? (image.webp.startsWith('http') ? image.webp : `${project.basePath || ''}${image.webp}`) : null;
+          const slide = document.createElement('div');
+          slide.className = 'carousel-slide';
+          slide.dataset.project = pIdx;
+          slide.dataset.image = iIdx;
+          const webp = resolvedWebp ? `<source srcset="${resolvedWebp}" type="image/webp">` : '';
+          slide.innerHTML = `
+            <picture>
+              ${webp}
+              <img src="${resolvedSrc}" alt="${image.alt}" loading="lazy">
+            </picture>
+          `;
+          carouselTrack.appendChild(slide);
+        });
+      });
+    };
+
+    const updateDots = () => {
+      carouselDots.innerHTML = '';
+      const total = projects[currentProjectIndex].images.length;
+      for (let i = 0; i < total; i++) {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'dot' + (i === currentImageIndex ? ' active' : '');
+        dot.setAttribute('aria-label', `Go to image ${i + 1} of ${total}`);
+        dot.addEventListener('click', () => {
+          currentImageIndex = i;
+          renderCarousel(true);
+          resetAutoplay();
+        });
+        carouselDots.appendChild(dot);
+      }
+    };
+
+    const renderCarousel = (skipCaptionFade = false) => {
+      const project = projects[currentProjectIndex];
+      const totalBefore = projects.slice(0, currentProjectIndex).reduce((sum, p) => sum + p.images.length, 0);
+      const targetIndex = totalBefore + currentImageIndex;
+      const slideWidth = windowEl.clientWidth;
+      carouselTrack.style.transform = `translate3d(-${targetIndex * slideWidth}px, 0, 0)`;
+
+      const image = project.images[currentImageIndex];
+      carouselCaption.textContent = image.alt || project.title;
+      if (!skipCaptionFade) {
+        carouselCaption.classList.add('fade');
+        setTimeout(() => carouselCaption.classList.remove('fade'), 180);
+      }
+      updateDots();
+      setHeroProjectSummary(project);
+
+      document.querySelectorAll('.project-pill').forEach((pill, idx) => {
+        pill.classList.toggle('active', idx === currentProjectIndex);
+      });
+    };
+
+    const nextImage = () => {
+      const project = projects[currentProjectIndex];
+      if (currentImageIndex < project.images.length - 1) {
+        currentImageIndex += 1;
+      } else {
+        currentProjectIndex = (currentProjectIndex + 1) % projects.length;
+        currentImageIndex = 0;
+      }
+      renderCarousel();
+    };
+
+    const prevImage = () => {
+      if (currentImageIndex > 0) {
+        currentImageIndex -= 1;
+      } else {
+        currentProjectIndex = (currentProjectIndex - 1 + projects.length) % projects.length;
+        currentImageIndex = projects[currentProjectIndex].images.length - 1;
+      }
+      renderCarousel();
+    };
+
+    const resetAutoplay = () => {
+      lastInteraction = Date.now();
+      if (autoplayTimer) clearInterval(autoplayTimer);
+      autoplayTimer = setInterval(() => {
+        if (Date.now() - lastInteraction > 4500) {
+          nextImage();
+        }
+      }, 5200);
+    };
+
+    let startX = 0;
+    let isDragging = false;
+
+    const onDragStart = (e) => {
+      isDragging = true;
+      startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+      carouselTrack.classList.add('grabbing');
+      clearInterval(autoplayTimer);
+    };
+    const onDragMove = (e) => {
+      if (!isDragging) return;
+      const currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+      const delta = currentX - startX;
+      const slideWidth = windowEl.clientWidth;
+      const project = projects[currentProjectIndex];
+      const totalBefore = projects.slice(0, currentProjectIndex).reduce((sum, p) => sum + p.images.length, 0);
+      const targetIndex = totalBefore + currentImageIndex;
+      carouselTrack.style.transform = `translate3d(calc(-${targetIndex * slideWidth}px + ${delta}px), 0, 0)`;
+    };
+    const onDragEnd = (e) => {
+      if (!isDragging) return;
+      const endX = e.type.includes('touch') ? (e.changedTouches[0]?.clientX || startX) : e.clientX;
+      const delta = endX - startX;
+      const threshold = windowEl.clientWidth * 0.15;
+      if (delta > threshold) {
+        prevImage();
+      } else if (delta < -threshold) {
+        nextImage();
+      } else {
+        renderCarousel(true);
+      }
+      carouselTrack.classList.remove('grabbing');
+      isDragging = false;
+      resetAutoplay();
+    };
+
+    window.addEventListener('resize', () => {
+      renderCarousel(true);
+    });
+
+    prevBtn.addEventListener('click', () => { prevImage(); resetAutoplay(); });
+    nextBtn.addEventListener('click', () => { nextImage(); resetAutoplay(); });
+    windowEl.addEventListener('mousedown', onDragStart);
+    windowEl.addEventListener('mousemove', onDragMove);
+    window.addEventListener('mouseup', onDragEnd);
+    windowEl.addEventListener('touchstart', onDragStart, { passive: true });
+    windowEl.addEventListener('touchmove', onDragMove, { passive: true });
+    windowEl.addEventListener('touchend', onDragEnd);
+
+    const contactForm = document.getElementById('contactForm');
+    const formspreeEndpoint = 'https://formspree.io/f/mzzbkbyd'; // replace with your own Formspree ID as needed
+    contactForm.setAttribute('action', formspreeEndpoint);
+    contactForm.addEventListener('submit', (event) => {
+      const action = contactForm.getAttribute('action') || '';
+      if (!action || action.includes('{your-form-id}')) {
+        event.preventDefault();
+        alert('Connect your form endpoint (Formspree/Netlify Forms) in the form action to receive submissions.');
+      }
+    });
+
+    const loadProjects = async () => {
+      const projectIndex = await loadJSON('data/projects.json', defaultProjects);
+      const manifests = await Promise.all(projectIndex.projects.map(async (p) => {
+        const manifest = await loadJSON(p.manifest, defaultManifest);
+        const base = p.basePath || '';
+        const images = manifest.images.map(img => ({ ...img, src: `${base}${img.src}` }));
+        return { ...manifest, title: manifest.title || p.name, slug: p.slug, basePath: base, images };
+      }));
+      projects = manifests.filter(p => p.images && p.images.length);
+      buildSlides();
+      buildProjectList();
+      renderCarousel(true);
+      resetAutoplay();
+    };
+
+    const init = async () => {
+      const content = await loadJSON('data/content.json', defaultContent);
+      const servicesData = await loadJSON('data/services.json', defaultServices);
+      renderContent(content);
+      renderServices(servicesData);
+      await loadProjects();
+    };
+
+    init();
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HomeAndConstructionBusiness",
+    "name": "[Business Name]",
+  "areaServed": "Puerto Rico",
+  "url": "https://example.com",
+  "telephone": "+17871234567",
+  "email": "info@example.com",
+  "image": "assets/projects/kitchen-refresh/kitchen-1.png",
+  "description": "Kitchen, bath, and home remodeling across Puerto Rico.",
+  "priceRange": "$$$"
+  }
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "eyebrow": "Puerto Rico • Kitchens • Baths • Carpentry",
+    "headline": "Beautiful, durable remodeling delivered with care.",
+    "subhead": "From concept to punch list, we handle cabinetry, counters, tile, lighting, and finishes with clear communication.",
+    "ctaPrimary": "Request a walkthrough",
+    "ctaSecondary": "Licensed & insured • Local crew"
+  },
+  "about": {
+    "heading": "Local crew. Licensed, insured, and hands-on. Professionals",
+    "subhead": "We serve the San Juan metro and nearby towns with clear timelines, dust protection, and site clean-up daily.",
+    "pillars": [
+      {
+        "title": "Predictable schedules",
+        "description": "We lock scope, sequence trades, and share weekly updates so you always know next steps."
+      },
+      {
+        "title": "Detail-focused",
+        "description": "Tight reveals, durable hardware, careful tile layout, and clean edges on every project."
+      },
+      {
+        "title": "Protected homes",
+        "description": "Floor protection, sealed work areas, and insured team members to keep your home safe."
+      }
+    ]
+  },
+  "contact": {
+    "heading": "Tell us about your space.",
+    "subhead": "We reply within one business day. Replace the form action with your Formspree or Netlify Forms endpoint to receive submissions."
+  }
+}
