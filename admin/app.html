@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Kitchen Admin</title>
+  <style>
+    :root { --bg:#f6f7fb; --card:#fff; --text:#0f1115; --muted:#5f6472; --accent:#1f3b2c; --border:#d7d9df; }
+    body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); }
+    header { padding:16px 20px; border-bottom:1px solid var(--border); background:#fff; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:10; }
+    h1 { margin:0; font-size:20px; }
+    .badge { background:var(--accent); color:#fff; padding:4px 10px; border-radius:999px; font-size:12px; }
+    main { padding:20px; max-width:1200px; margin:0 auto; }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+    .tab { padding:10px 14px; border:1px solid var(--border); border-radius:8px; background:#fff; cursor:pointer; color:var(--text); }
+    .tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .panel { display:none; }
+    .panel.active { display:block; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:16px; }
+    label { display:block; margin-bottom:8px; font-weight:600; }
+    input, textarea, select { width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); font-size:14px; }
+    textarea { min-height:120px; }
+    button { padding:10px 14px; border-radius:8px; border:1px solid var(--accent); background:var(--accent); color:#fff; cursor:pointer; font-weight:600; }
+    button.secondary { background:#fff; color:var(--accent); }
+    .row { display:flex; gap:12px; flex-wrap:wrap; }
+    .row .col { flex:1; min-width:260px; }
+    .list { display:flex; flex-direction:column; gap:12px; }
+    .small { color:var(--muted); font-size:13px; }
+    .status { margin:12px 0; font-weight:600; }
+    .toast { position:fixed; bottom:16px; right:16px; background:var(--text); color:#fff; padding:12px 16px; border-radius:10px; opacity:0; transform:translateY(10px); transition:all .2s ease; }
+    .toast.show { opacity:1; transform:translateY(0); }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; background:#eef1f6; border:1px solid var(--border); font-size:12px; }
+    .upload-drop { border:2px dashed var(--border); border-radius:10px; padding:20px; text-align:center; background:#fff; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Project Kitchen Admin</h1>
+    <span class="badge" id="authStatus">Checking access…</span>
+  </header>
+  <main>
+    <p class="small">Access is protected by Cloudflare Access. Changes are committed directly to GitHub.</p>
+    <div class="tabs" id="tabs"></div>
+    <div id="panels"></div>
+  </main>
+  <div class="toast" id="toast"></div>
+  <script src="/admin/admin.js" type="module"></script>
+</body>
+</html>
