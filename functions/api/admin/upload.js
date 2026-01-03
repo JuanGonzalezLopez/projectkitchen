@@ -1,4 +1,4 @@
-import { verifyRequestAuth } from '../shared/auth.js';
+import { verifyRequestAuth } from '../../shared/auth.js';
 
 const rateMap = new Map();
 const RATE_WINDOW = 600;

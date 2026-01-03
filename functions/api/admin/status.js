@@ -1,4 +1,4 @@
-import { verifyRequestAuth } from '../shared/auth.js';
+import { verifyRequestAuth } from '../../shared/auth.js';
 
 export const onRequest = async (context) => {
   try {

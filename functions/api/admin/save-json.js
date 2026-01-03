@@ -1,4 +1,4 @@
-import { verifyRequestAuth } from '../shared/auth.js';
+import { verifyRequestAuth } from '../../shared/auth.js';
 
 const ALLOWED_JSON_PATHS = [
   'data/content.json',
