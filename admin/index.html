@@ -34,16 +34,6 @@
         }
         log('CMS global found, initializing');
         CMS.init();
-        if (CMS.registerEventListener) {
-          CMS.registerEventListener({
-            name: 'login',
-            handler: (payload) => log('CMS login event', payload)
-          });
-          CMS.registerEventListener({
-            name: 'error',
-            handler: (payload) => log('CMS error event', payload)
-          });
-        }
       };
 
       attachMessageListener();
