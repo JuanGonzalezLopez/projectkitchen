@@ -8,31 +8,64 @@
 <body>
   <script src="/admin/decap-cms.js"></script>
   <script>
-    if (window.CMS) {
-      window.CMS.init();
-    } else {
-      document.body.innerHTML = '<p>Decap CMS failed to load.</p>';
-    }
-  </script>
-  <script>
     (function() {
       const params = new URLSearchParams(window.location.search);
       const debugOAuth = params.get('debug_oauth') === '1';
-      if (!debugOAuth) return;
-      window.addEventListener('message', (event) => {
-        if (typeof event.data === 'string' && event.data.startsWith('authorization:github:')) {
-          // Optional debug log with token suffix only
-          try {
-            const payload = JSON.parse(event.data.replace('authorization:github:', ''));
-            if (payload && payload.token) {
-              console.log('[admin debug oauth] token suffix:', String(payload.token).slice(-6));
+      const log = (...args) => {
+        if (debugOAuth) console.log('[admin oauth]', ...args);
+      };
+
+      log('Page load', { href: window.location.href, path: window.location.pathname });
+
+      const attachMessageListener = () => {
+        window.addEventListener('message', (event) => {
+          if (typeof event.data !== 'string') return;
+          const prefix = event.data.slice(0, 32);
+          log('message event', { origin: event.origin, prefix });
+          if (event.data.startsWith('authorization:github:')) {
+            try {
+              const payload = JSON.parse(event.data.replace('authorization:github:', ''));
+              if (payload && payload.token) {
+                log('token received suffix', String(payload.token).slice(-6));
+              }
+            } catch (_) {
+              log('token parse failed');
             }
-          } catch (_) {}
-          if (event.source && event.source.postMessage) {
-            event.source.postMessage('authorization:github:ack', '*');
+            if (event.source && event.source.postMessage) {
+              event.source.postMessage('authorization:github:ack', event.origin || '*');
+              log('sent ACK to opener', { target: event.origin || '*' });
+            }
           }
+        });
+        log('message listener attached');
+      };
+
+      const initCMS = () => {
+        if (!window.CMS) {
+          log('CMS not ready, retrying...');
+          setTimeout(initCMS, 100);
+          return;
         }
-      });
+        log('CMS global found, initializing');
+        CMS.init();
+        if (CMS.registerEventListener) {
+          CMS.registerEventListener({
+            name: 'login',
+            handler: (payload) => log('CMS login event', payload)
+          });
+          CMS.registerEventListener({
+            name: 'error',
+            handler: (payload) => log('CMS error event', payload)
+          });
+        }
+      };
+
+      attachMessageListener();
+      initCMS();
+
+      if (!window.CMS) {
+        console.log('Decap CMS failed to load.');
+      }
     })();
   </script>
 </body>
