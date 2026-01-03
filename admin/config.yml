@@ -84,7 +84,7 @@ collections:
     create: true
     extension: json
     format: json
-    slug: "{{slug}}/manifest"
+    slug: "{{slug}}"
     path: "{{slug}}/manifest"
     media_folder: assets/projects/{{slug}}
     public_folder: /assets/projects/{{slug}}

@@ -29,7 +29,7 @@ const truncate = (value, max = 500) => {
   return value.length > max ? `${value.slice(0, max)}…` : value;
 };
 
-const startOAuth = (url, env) => {
+const startOAuth = (url, env, debug) => {
   const clientId = env.GITHUB_CLIENT_ID;
   const clientSecret = env.GITHUB_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
@@ -51,7 +51,8 @@ const startOAuth = (url, env) => {
   console.log('[auth] startOAuth', {
     requestOrigin: url.origin,
     authorizeUrl: authorizeUrl.toString(),
-    redirectUri
+    redirectUri,
+    debug
   });
 
   return new Response(null, {
@@ -112,7 +113,9 @@ const handleCallback = async (url, request, env, debug) => {
     if (!tokenRes.ok) {
       tokenBody = await tokenRes.text();
       console.error('[auth] token exchange failed', { status: tokenStatus, body: truncate(tokenBody) });
-      return htmlResponse(`<p>GitHub token exchange failed (${tokenStatus}).</p><pre>${tokenBody || 'No body'}</pre>`, tokenStatus);
+      const rateLimited = tokenStatus === 429 || tokenStatus === 403;
+      const hint = rateLimited ? 'GitHub rate-limited this OAuth flow, wait and retry.' : 'GitHub token exchange failed.';
+      return htmlResponse(`<p>${hint}</p><pre>${tokenBody || 'No body'}</pre><p><a href="${url.origin}/api/auth?provider=github&site_id=projectkitchen.pages.dev&scope=repo&debug=1">Retry authorize</a></p>`, tokenStatus);
     }
     const contentType = tokenRes.headers.get('content-type') || '';
     if (contentType.includes('application/json')) {
@@ -127,7 +130,7 @@ const handleCallback = async (url, request, env, debug) => {
     return htmlResponse('<p>GitHub token exchange failed (network).</p>', 502);
   }
   const accessToken = tokenData.access_token;
-  const targetOrigin = savedState.origin || url.origin;
+  const targetOrigin = url.origin;
 
   console.log('[auth] token exchange result', {
     status: tokenStatus,
@@ -152,6 +155,8 @@ const handleCallback = async (url, request, env, debug) => {
       <li>Token status: ${tokenStatus}</li>
       <li>Token body (truncated): <pre>${truncate(tokenBody || JSON.stringify(tokenData || {}))}</pre></li>
     </ul>
+    <button onclick="window.postMessageAgain && window.postMessageAgain()">PostMessage again</button>
+    <button onclick="window.close()">Close</button>
     <p><a href="${url.origin}/api/auth">Retry authorize</a></p>
     `
     : '';
@@ -163,14 +168,23 @@ const handleCallback = async (url, request, env, debug) => {
 ${debugInfo}
 <script>
   (function() {
-    const token = ${JSON.stringify(accessToken)};
-    const message = "authorization:github:" + JSON.stringify({ token, provider: "github" });
-    const target = ${JSON.stringify(targetOrigin)};
-    if (window.opener) {
-      window.opener.postMessage(message, target);
-      ${debug ? '' : 'window.close();'}
-    } else {
-      document.body.innerText = 'Authentication complete. Please return to the app.';
+    var token = ${JSON.stringify(accessToken)};
+    var msg = 'authorization:github:' + JSON.stringify({ token: token, provider: 'github' });
+    var target = ${JSON.stringify(targetOrigin)};
+    var statusEl = document.createElement('p');
+    statusEl.id = 'pmStatus';
+    statusEl.textContent = 'Posting message to ' + target;
+    document.body.appendChild(statusEl);
+    function sendMessage() {
+      if (window.opener) {
+        window.opener.postMessage(msg, target);
+        statusEl.textContent = 'postMessage sent to ' + target;
+      }
+    }
+    window.postMessageAgain = sendMessage;
+    sendMessage();
+    if (!${JSON.stringify(!!debug)}) {
+      setTimeout(function(){ window.close(); }, 250);
     }
   })();
 </script>
