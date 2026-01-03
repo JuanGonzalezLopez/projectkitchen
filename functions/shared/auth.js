@@ -64,6 +64,11 @@ export const verifyRequestAuth = async ({ request, env }) => {
   const basic = basicAuth(request, env);
   if (basic) return basic;
 
+  // If Access is not configured and no basic auth, allow temporary open access (development only).
+  if (!env.CF_ACCESS_TEAM_DOMAIN || !env.CF_ACCESS_AUD) {
+    return { email: null, mode: 'none' };
+  }
+
   const token = request.headers.get('Cf-Access-Jwt-Assertion');
   if (!token) throw { status: 401, message: 'Missing Access token' };
 
