@@ -152,12 +152,13 @@ const handleCallback = async (url, request, env, debug) => {
       <li>State cookie present: ${hasStateCookie}</li>
       <li>State match: ${stateMatches}</li>
       <li>Token status: ${tokenStatus}</li>
-      <li>Message target: ${debug ? '*' : targetOrigin}</li>
-      <li>Message payload: authorization:github:${truncate(JSON.stringify({ token: accessToken, provider: 'github' }), 120)}</li>
+      <li>Message targets: ${debug ? '*' : targetOrigin}</li>
+      <li>Payload A: authorization:github:${truncate(accessToken, 64)}</li>
+      <li>Payload B: authorization:github:${truncate(JSON.stringify({ token: accessToken, provider: 'github' }), 120)}</li>
       <li>Token body (truncated): <pre>${truncate(tokenBody || JSON.stringify(tokenData || {}))}</pre></li>
     </ul>
     <p id="pmStatus"></p>
-    <button id="resendBtn">Resend message</button>
+    <button id="resendBtn">Resend messages</button>
     <button id="closeBtn">Close</button>
     <p><a href="${url.origin}/api/auth">Retry authorize</a></p>
   `;
@@ -170,7 +171,8 @@ ${debug ? debugInfo : ''}
 <script>
   (function() {
     var token = ${JSON.stringify(accessToken)};
-    var msg = 'authorization:github:' + JSON.stringify({ token: token, provider: 'github' });
+    var payloadA = 'authorization:github:' + token;
+    var payloadB = 'authorization:github:' + JSON.stringify({ token: token, provider: 'github' });
     var target = ${JSON.stringify(targetOrigin)};
     var debugMode = ${JSON.stringify(!!debug)};
     var openerPresent = !!window.opener;
@@ -179,35 +181,24 @@ ${debug ? debugInfo : ''}
     statusEl.textContent = 'Preparing postMessage. opener=' + openerPresent + ', target=' + (debugMode ? '*' : target);
     if (!document.getElementById('pmStatus')) document.body.appendChild(statusEl);
 
-    var ack = false;
-    function sendMessage() {
-      if (window.opener) {
-        window.opener.postMessage(msg, debugMode ? '*' : target);
-        statusEl.textContent = 'postMessage sent to ' + (debugMode ? '*' : target);
-      } else {
+    function sendMessages() {
+      if (!window.opener) {
         statusEl.textContent = 'No window.opener available to postMessage.';
+        return;
       }
+      var tgt = debugMode ? '*' : target;
+      window.opener.postMessage(payloadA, tgt);
+      setTimeout(function() {
+        window.opener.postMessage(payloadB, tgt);
+      }, 50);
+      statusEl.textContent = 'Messages sent to ' + tgt;
     }
 
-    window.addEventListener('message', function(ev) {
-      if (ev && typeof ev.data === 'string' && ev.data === 'authorization:github:ack') {
-        ack = true;
-        statusEl.textContent = 'ACK received from opener.';
-        if (!debugMode) {
-          setTimeout(function(){ window.close(); }, 250);
-        }
-      }
-    });
-
-    sendMessage();
-    setTimeout(function() {
-      if (!ack) {
-        statusEl.textContent = 'No ACK received yet.';
-      }
-    }, 1500);
+    sendMessages();
+    setTimeout(function(){ if (!debugMode) window.close(); }, 2500);
 
     var resendBtn = document.getElementById('resendBtn');
-    if (resendBtn) resendBtn.onclick = sendMessage;
+    if (resendBtn) resendBtn.onclick = sendMessages;
     var closeBtn = document.getElementById('closeBtn');
     if (closeBtn) closeBtn.onclick = function(){ window.close(); };
   })();

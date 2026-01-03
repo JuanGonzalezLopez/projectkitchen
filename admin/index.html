@@ -22,20 +22,6 @@
           if (typeof event.data !== 'string') return;
           const prefix = event.data.slice(0, 32);
           log('message event', { origin: event.origin, prefix });
-          if (event.data.startsWith('authorization:github:')) {
-            try {
-              const payload = JSON.parse(event.data.replace('authorization:github:', ''));
-              if (payload && payload.token) {
-                log('token received suffix', String(payload.token).slice(-6));
-              }
-            } catch (_) {
-              log('token parse failed');
-            }
-            if (event.source && event.source.postMessage) {
-              event.source.postMessage('authorization:github:ack', event.origin || '*');
-              log('sent ACK to opener', { target: event.origin || '*' });
-            }
-          }
         });
         log('message listener attached');
       };
