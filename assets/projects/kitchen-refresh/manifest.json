@@ -3,8 +3,25 @@
   "location": "San Juan, PR",
   "description": "Custom cabinets, quartz counters, under-cabinet lighting, and built-in storage.",
   "images": [
-    { "src": "kitchen-1.png", "webp": "kitchen-1.webp", "alt": "Remodeled kitchen with waterfall island and warm wood cabinets" },
-    { "src": "kitchen-2.png", "webp": "kitchen-2.webp", "alt": "Remodeled kitchen with quartz counters and new lighting" },
-    { "src": "kitchen-3.png", "webp": "kitchen-3.webp", "alt": "Built-in shelving and finished trim in remodeled kitchen" }
+    {
+      "src": "kitchen-1.png",
+      "webp": "kitchen-1.webp",
+      "alt": "Remodeled kitchen with waterfall island and warm wood cabinets"
+    },
+    {
+      "src": "kitchen-2.png",
+      "webp": "kitchen-2.webp",
+      "alt": "Remodeled kitchen with quartz counters and new lighting"
+    },
+    {
+      "src": "kitchen-3.png",
+      "webp": "kitchen-3.webp",
+      "alt": "Built-in shelving and finished trim in remodeled kitchen"
+    },
+    {
+      "src": "kitchen-4-1767420836573.png",
+      "webp": "",
+      "alt": "testing a new image"
+    }
   ]
 }
