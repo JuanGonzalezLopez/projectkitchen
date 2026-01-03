@@ -1,13 +1,14 @@
 backend:
-  name: git-gateway
+  name: github
   repo: JuanGonzalezLopez/projectkitchen
   branch: main
-  gateway_url: https://projectkitchen.pages.dev/api/auth
+  base_url: https://projectkitchen.pages.dev
+  auth_endpoint: https://projectkitchen.pages.dev/api/auth
 
 site_url: https://projectkitchen.pages.dev
 media_folder: assets/uploads
 public_folder: /assets/uploads
-publish_mode: simple
+publish_mode: editorial_workflow
 
 collections:
   - name: site
