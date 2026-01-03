@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Content Manager | Project Kitchen</title>
+</head>
+<body>
+  <script src="https://unpkg.com/decap-cms@3.0.10/dist/decap-cms.js"></script>
+  <script>
+    if (window.CMS) {
+      window.CMS.init();
+    } else {
+      document.body.innerHTML = '<p>Decap CMS failed to load.</p>';
+    }
+  </script>
+</body>
+</html>

@@ -5,11 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>[Business Name] | Kitchens & Remodeling in Puerto Rico</title>
   <meta name="description" content="Clean, trusted home remodeling: kitchens, baths, and carpentry across Puerto Rico.">
+  <link rel="canonical" id="canonicalLink" href="https://projectkitchen.pages.dev/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" id="ogTitle" content="[Business Name] | Kitchens & Remodeling in Puerto Rico">
+  <meta property="og:description" id="ogDescription" content="Clean, trusted home remodeling: kitchens, baths, and carpentry across Puerto Rico.">
+  <meta property="og:url" id="ogUrl" content="https://projectkitchen.pages.dev/">
+  <meta property="og:image" id="ogImage" content="assets/projects/kitchen-refresh/kitchen-1.png">
   <meta name="theme-color" content="#1f3b2c">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -109,18 +116,25 @@
             </div>
             <span class="pill soft">Service area: Metro PR</span>
           </div>
-          <form id="contactForm" action="https://formspree.io/f/{your-form-id}" method="post">
+          <form id="contactForm" action="/api/contact" method="post" novalidate>
+            <div class="visually-hidden" aria-hidden="true">
+              <label>Leave this field empty
+                <input id="company" name="company" class="honeypot" tabindex="-1" autocomplete="off">
+              </label>
+            </div>
             <label>Name
-              <input id="name" name="name" autocomplete="name" required>
+              <input id="name" name="name" type="text" autocomplete="name" required>
             </label>
             <label>Phone
-              <input id="phone" name="phone" autocomplete="tel" required>
+              <input id="phone" name="phone" type="tel" autocomplete="tel" required>
             </label>
             <label>Project details
               <textarea id="message" name="message" rows="4" required></textarea>
             </label>
-            <button class="btn" type="submit">Send message</button>
-            <p class="muted small">We only use your details to respond to this inquiry. Replace the form action with your endpoint; no API keys are stored here.</p>
+            <div id="turnstileContainer" class="turnstile-container" data-sitekey=""></div>
+            <div id="contactStatus" class="form-status" role="status" aria-live="polite"></div>
+            <button class="btn" type="submit" id="contactSubmit">Send message</button>
+            <p class="muted small">We only use your details to respond to this inquiry. This form is protected by Cloudflare Turnstile.</p>
           </form>
         </div>
         <div class="card contact-steps">
@@ -166,6 +180,8 @@
     });
 
     const defaultContent = {
+      siteUrl: 'https://projectkitchen.pages.dev',
+      turnstileSiteKey: '',
       hero: {
         eyebrow: 'Puerto Rico • Kitchens • Baths • Carpentry',
         headline: 'Beautiful, durable remodeling delivered with care.',
@@ -184,7 +200,7 @@
       },
       contact: {
         heading: 'Tell us about your space.',
-        subhead: 'We reply within one business day. Replace the form action with your Formspree or Netlify Forms endpoint to receive submissions.'
+        subhead: 'We reply within one business day. Your details are protected with spam checks before we receive them.'
       }
     };
 
@@ -218,8 +234,26 @@
       ]
     };
 
+    const fallbackOgImage = 'assets/projects/kitchen-refresh/kitchen-1.png';
+
     const yearEl = document.getElementById('year');
     if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    const canonicalEl = document.getElementById('canonicalLink');
+    const ogUrlEl = document.getElementById('ogUrl');
+    const ogTitleEl = document.getElementById('ogTitle');
+    const ogDescEl = document.getElementById('ogDescription');
+    const ogImageEl = document.getElementById('ogImage');
+    let structuredDataEl = document.getElementById('structuredData');
+
+    const contactForm = document.getElementById('contactForm');
+    const contactStatus = document.getElementById('contactStatus');
+    const contactSubmit = document.getElementById('contactSubmit');
+    const honeypot = document.getElementById('company');
+
+    let turnstileWidgetId = null;
+    let turnstileToken = '';
+    let turnstileSiteKey = '';
 
     const loadJSON = async (path, fallback) => {
       try {
@@ -230,6 +264,61 @@
         console.warn(`Using fallback for ${path}: ${e.message}. Serve over http (python -m http.server) to avoid file:// fetch limits.`);
         return fallback;
       }
+    };
+
+    const ensureAbsoluteUrl = (path, base) => {
+      if (!path) return base;
+      if (path.startsWith('http')) return path;
+      try {
+        return new URL(path, base).href;
+      } catch (e) {
+        return path;
+      }
+    };
+
+    const updateStructuredData = (siteUrl, imageUrl, description) => {
+      if (!structuredDataEl) {
+        structuredDataEl = document.getElementById('structuredData');
+      }
+      if (!structuredDataEl) {
+        structuredDataEl = document.createElement('script');
+        structuredDataEl.type = 'application/ld+json';
+        structuredDataEl.id = 'structuredData';
+        document.body.appendChild(structuredDataEl);
+      }
+      const name = document.querySelector('.brand')?.textContent?.trim() || '[Business Name]';
+      const phone = document.querySelector('.contact-row a[href^="tel:"]')?.textContent?.trim() || '+17871234567';
+      const email = document.querySelector('.contact-row a[href^="mailto:"]')?.textContent?.trim() || 'info@example.com';
+      const data = {
+        "@context": "https://schema.org",
+        "@type": "HomeAndConstructionBusiness",
+        name,
+        areaServed: "Puerto Rico",
+        url: siteUrl,
+        telephone: phone,
+        email,
+        image: imageUrl,
+        description: description || 'Kitchen, bath, and home remodeling across Puerto Rico.',
+        priceRange: "$$$"
+      };
+      structuredDataEl.textContent = JSON.stringify(data, null, 2);
+    };
+
+    const setMetaTags = (content, projectList = projects) => {
+      const siteUrl = content.siteUrl || `${window.location.protocol}//${window.location.host}/`;
+      const normalizedSiteUrl = siteUrl.endsWith('/') ? siteUrl : `${siteUrl}/`;
+      const descMeta = document.querySelector('meta[name="description"]');
+      const description = descMeta?.getAttribute('content') || '';
+      const title = document.title;
+      const firstImage = projectList?.[0]?.images?.[0]?.src || fallbackOgImage;
+      const ogImage = ensureAbsoluteUrl(firstImage, normalizedSiteUrl);
+
+      if (canonicalEl) canonicalEl.setAttribute('href', normalizedSiteUrl);
+      if (ogUrlEl) ogUrlEl.setAttribute('content', normalizedSiteUrl);
+      if (ogTitleEl) ogTitleEl.setAttribute('content', title);
+      if (ogDescEl && description) ogDescEl.setAttribute('content', description);
+      if (ogImageEl) ogImageEl.setAttribute('content', ogImage);
+      updateStructuredData(normalizedSiteUrl, ogImage, description);
     };
 
     const renderContent = (content) => {
@@ -289,6 +378,7 @@
     let lastInteraction = Date.now();
 
     const setHeroProjectSummary = (project) => {
+      if (!project) return;
       document.getElementById('projectTitle').textContent = project.title;
       document.getElementById('projectLocation').textContent = project.location || '';
       document.getElementById('projectScope').textContent = project.description || '';
@@ -296,6 +386,7 @@
     };
 
     const buildProjectList = () => {
+      if (!projects.length) return;
       projectListEl.innerHTML = '';
       projects.forEach((project, idx) => {
         const btn = document.createElement('button');
@@ -314,6 +405,7 @@
     };
 
     const buildSlides = () => {
+      if (!projects.length) return;
       carouselTrack.innerHTML = '';
       projects.forEach((project, pIdx) => {
         project.images.forEach((image, iIdx) => {
@@ -336,6 +428,7 @@
     };
 
     const updateDots = () => {
+      if (!projects.length) return;
       carouselDots.innerHTML = '';
       const total = projects[currentProjectIndex].images.length;
       for (let i = 0; i < total; i++) {
@@ -353,6 +446,7 @@
     };
 
     const renderCarousel = (skipCaptionFade = false) => {
+      if (!projects.length) return;
       const project = projects[currentProjectIndex];
       const totalBefore = projects.slice(0, currentProjectIndex).reduce((sum, p) => sum + p.images.length, 0);
       const targetIndex = totalBefore + currentImageIndex;
@@ -374,6 +468,7 @@
     };
 
     const nextImage = () => {
+      if (!projects.length) return;
       const project = projects[currentProjectIndex];
       if (currentImageIndex < project.images.length - 1) {
         currentImageIndex += 1;
@@ -385,6 +480,7 @@
     };
 
     const prevImage = () => {
+      if (!projects.length) return;
       if (currentImageIndex > 0) {
         currentImageIndex -= 1;
       } else {
@@ -395,6 +491,7 @@
     };
 
     const resetAutoplay = () => {
+      if (!projects.length) return;
       lastInteraction = Date.now();
       if (autoplayTimer) clearInterval(autoplayTimer);
       autoplayTimer = setInterval(() => {
@@ -453,16 +550,126 @@
     windowEl.addEventListener('touchmove', onDragMove, { passive: true });
     windowEl.addEventListener('touchend', onDragEnd);
 
-    const contactForm = document.getElementById('contactForm');
-    const formspreeEndpoint = 'https://formspree.io/f/mzzbkbyd'; // replace with your own Formspree ID as needed
-    contactForm.setAttribute('action', formspreeEndpoint);
-    contactForm.addEventListener('submit', (event) => {
-      const action = contactForm.getAttribute('action') || '';
-      if (!action || action.includes('{your-form-id}')) {
-        event.preventDefault();
-        alert('Connect your form endpoint (Formspree/Netlify Forms) in the form action to receive submissions.');
+    const waitForTurnstile = () => new Promise((resolve) => {
+      if (window.turnstile) {
+        resolve();
+        return;
       }
+      const start = Date.now();
+      const timer = setInterval(() => {
+        if (window.turnstile || Date.now() - start > 7000) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 120);
     });
+
+    const fetchTurnstileSiteKey = async (content) => {
+      try {
+        const res = await fetch('/api/public-config', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.turnstileSiteKey) {
+            return data.turnstileSiteKey;
+          }
+        }
+      } catch (e) {
+        console.warn('Turnstile site key endpoint unavailable; falling back to content file.', e);
+      }
+      return content.turnstileSiteKey || '';
+    };
+
+    const renderTurnstileWidget = async (siteKey) => {
+      const container = document.getElementById('turnstileContainer');
+      if (!container) return;
+      if (!siteKey) {
+        setFormStatus('error', 'Spam protection is not configured yet.');
+        return;
+      }
+      await waitForTurnstile();
+      if (!window.turnstile) {
+        setFormStatus('error', 'Spam protection is unavailable right now. Please retry.');
+        return;
+      }
+      container.innerHTML = '';
+      turnstileWidgetId = window.turnstile.render(container, {
+        sitekey: siteKey,
+        theme: 'light',
+        callback: (token) => { turnstileToken = token; },
+        'expired-callback': () => { turnstileToken = ''; },
+        'error-callback': () => {
+          turnstileToken = '';
+          setFormStatus('error', 'Spam check failed. Please retry.');
+        }
+      });
+    };
+
+    const setFormStatus = (state, message) => {
+      if (!contactStatus) return;
+      contactStatus.textContent = message || '';
+      contactStatus.classList.remove('success', 'error', 'sending');
+      if (state) contactStatus.classList.add(state);
+    };
+
+    if (contactForm) {
+      contactForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        setFormStatus('', '');
+        if (honeypot && honeypot.value) {
+          setFormStatus('error', 'Unable to submit at this time.');
+          return;
+        }
+        if (contactSubmit) {
+          contactSubmit.disabled = true;
+          contactSubmit.textContent = 'Sending...';
+        }
+        setFormStatus('sending', 'Sending your message...');
+        if (!turnstileToken) {
+          setFormStatus('error', 'Please complete the spam check before submitting.');
+          if (contactSubmit) {
+            contactSubmit.disabled = false;
+            contactSubmit.textContent = 'Send message';
+          }
+          if (window.turnstile && turnstileWidgetId !== null) {
+            window.turnstile.reset(turnstileWidgetId);
+          }
+          return;
+        }
+        const payload = {
+          name: document.getElementById('name').value.trim(),
+          phone: document.getElementById('phone').value.trim(),
+          message: document.getElementById('message').value.trim(),
+          turnstileToken
+        };
+        try {
+          const res = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.ok) {
+            setFormStatus('success', 'Thanks! We received your message and will reply soon.');
+            contactForm.reset();
+          } else if (res.status === 404) {
+            setFormStatus('error', 'Local dev server cannot reach /api/contact. Deploy to Cloudflare Pages or run functions to test.');
+          } else {
+            setFormStatus('error', data.error || 'We could not send your message. Please try again.');
+          }
+        } catch (error) {
+          setFormStatus('error', 'We could not reach the server. Please email or call us instead.');
+        } finally {
+          if (contactSubmit) {
+            contactSubmit.disabled = false;
+            contactSubmit.textContent = 'Send message';
+          }
+          if (window.turnstile && turnstileWidgetId !== null) {
+            window.turnstile.reset(turnstileWidgetId);
+          }
+          turnstileToken = '';
+        }
+      });
+    }
 
     const loadProjects = async () => {
       const projectIndex = await loadJSON('data/projects.json', defaultProjects);
@@ -473,10 +680,12 @@
         return { ...manifest, title: manifest.title || p.name, slug: p.slug, basePath: base, images };
       }));
       projects = manifests.filter(p => p.images && p.images.length);
+      if (!projects.length) return projects;
       buildSlides();
       buildProjectList();
       renderCarousel(true);
       resetAutoplay();
+      return projects;
     };
 
     const init = async () => {
@@ -484,23 +693,26 @@
       const servicesData = await loadJSON('data/services.json', defaultServices);
       renderContent(content);
       renderServices(servicesData);
-      await loadProjects();
+      turnstileSiteKey = await fetchTurnstileSiteKey(content);
+      await renderTurnstileWidget(turnstileSiteKey);
+      const loadedProjects = await loadProjects();
+      setMetaTags(content, loadedProjects);
     };
 
-    init();
+    document.addEventListener('DOMContentLoaded', init);
   </script>
-  <script type="application/ld+json">
+  <script type="application/ld+json" id="structuredData">
   {
     "@context": "https://schema.org",
     "@type": "HomeAndConstructionBusiness",
     "name": "[Business Name]",
-  "areaServed": "Puerto Rico",
-  "url": "https://example.com",
-  "telephone": "+17871234567",
-  "email": "info@example.com",
-  "image": "assets/projects/kitchen-refresh/kitchen-1.png",
-  "description": "Kitchen, bath, and home remodeling across Puerto Rico.",
-  "priceRange": "$$$"
+    "areaServed": "Puerto Rico",
+    "url": "https://projectkitchen.pages.dev/",
+    "telephone": "+17871234567",
+    "email": "info@example.com",
+    "image": "assets/projects/kitchen-refresh/kitchen-1.png",
+    "description": "Kitchen, bath, and home remodeling across Puerto Rico.",
+    "priceRange": "$$$"
   }
   </script>
 </body>

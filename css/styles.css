@@ -400,6 +400,28 @@ p{margin:0.25rem 0 0.75rem;}
   color:#0f1110;
 }
 .contact-steps li{margin-bottom:0.35rem;}
+.turnstile-container{min-height:78px;}
+.form-status{
+  min-height:1.25rem;
+  font-size:0.95rem;
+  color:var(--muted);
+}
+.form-status.success{color:var(--brand);}
+.form-status.error{color:#b23c2d;}
+.form-status.sending{color:var(--muted);}
+.visually-hidden{
+  position:absolute !important;
+  height:1px;
+  width:1px;
+  overflow:hidden;
+  clip:rect(1px, 1px, 1px, 1px);
+  white-space:nowrap;
+}
+.honeypot{
+  position:absolute;
+  left:-9999px;
+  opacity:0;
+}
 
 .footer{
   padding:1.5rem 0;

@@ -1,4 +1,6 @@
 {
+  "siteUrl": "https://projectkitchen.pages.dev",
+  "turnstileSiteKey": "0x4AAAAAACKQdrfelvVrNsDO",
   "hero": {
     "eyebrow": "Puerto Rico • Kitchens • Baths • Carpentry",
     "headline": "Beautiful, durable remodeling delivered with care.",
@@ -26,6 +28,6 @@
   },
   "contact": {
     "heading": "Tell us about your space.",
-    "subhead": "We reply within one business day. Replace the form action with your Formspree or Netlify Forms endpoint to receive submissions."
+    "subhead": "We reply within one business day. Your details are protected with spam checks before we receive them."
   }
 }
