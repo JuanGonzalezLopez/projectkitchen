@@ -55,6 +55,7 @@ Static, JSON-driven marketing site for a remodeling business. Hosted on Cloudfla
 ### Troubleshooting Decap OAuth
 - Confirm the OAuth App callback is `https://projectkitchen.pages.dev/api/auth`.
 - Visit `/api/auth?debug=1` to see the computed origin/redirect and keep the popup open; use “PostMessage again” if needed.
+- Visit `/admin/?debug_oauth=1` before logging in to auto-ACK the popup message and surface debug logs in the console (token suffix only).
 - Check Cloudflare Pages Function logs for `[auth]` entries (state match, token status, truncated bodies).
 - If GitHub rate limits the flow, wait and retry from `/api/auth?provider=github&site_id=projectkitchen.pages.dev&scope=repo&debug=1`.
 - GitHub OAuth flow is handled by `/api/auth` (Pages Function):

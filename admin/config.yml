@@ -85,7 +85,7 @@ collections:
     extension: json
     format: json
     slug: "{{slug}}"
-    path: "{{slug}}/manifest"
+    path: "{{slug}}/manifest.json"
     media_folder: assets/projects/{{slug}}
     public_folder: /assets/projects/{{slug}}
     fields:

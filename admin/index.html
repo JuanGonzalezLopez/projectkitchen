@@ -14,5 +14,26 @@
       document.body.innerHTML = '<p>Decap CMS failed to load.</p>';
     }
   </script>
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const debugOAuth = params.get('debug_oauth') === '1';
+      if (!debugOAuth) return;
+      window.addEventListener('message', (event) => {
+        if (typeof event.data === 'string' && event.data.startsWith('authorization:github:')) {
+          // Optional debug log with token suffix only
+          try {
+            const payload = JSON.parse(event.data.replace('authorization:github:', ''));
+            if (payload && payload.token) {
+              console.log('[admin debug oauth] token suffix:', String(payload.token).slice(-6));
+            }
+          } catch (_) {}
+          if (event.source && event.source.postMessage) {
+            event.source.postMessage('authorization:github:ack', '*');
+          }
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

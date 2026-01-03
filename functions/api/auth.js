@@ -144,48 +144,72 @@ const handleCallback = async (url, request, env, debug) => {
     });
   }
 
-  const debugInfo = debug
-    ? `
+  const debugInfo = `
     <h2>OAuth Debug</h2>
     <ul>
-      <li>Origin: ${targetOrigin}</li>
+      <li>Window origin: ${targetOrigin}</li>
       <li>Redirect URI: ${redirectUri}</li>
       <li>State cookie present: ${hasStateCookie}</li>
       <li>State match: ${stateMatches}</li>
       <li>Token status: ${tokenStatus}</li>
+      <li>Message target: ${debug ? '*' : targetOrigin}</li>
+      <li>Message payload: authorization:github:${truncate(JSON.stringify({ token: accessToken, provider: 'github' }), 120)}</li>
       <li>Token body (truncated): <pre>${truncate(tokenBody || JSON.stringify(tokenData || {}))}</pre></li>
     </ul>
-    <button onclick="window.postMessageAgain && window.postMessageAgain()">PostMessage again</button>
-    <button onclick="window.close()">Close</button>
+    <p id="pmStatus"></p>
+    <button id="resendBtn">Resend message</button>
+    <button id="closeBtn">Close</button>
     <p><a href="${url.origin}/api/auth">Retry authorize</a></p>
-    `
-    : '';
+  `;
 
   const html = `<!doctype html>
 <html>
 <body>
-<p>Completing authentication…${debug ? '' : ' you can close this window.'}</p>
-${debugInfo}
+<p>Completing authentication…</p>
+${debug ? debugInfo : ''}
 <script>
   (function() {
     var token = ${JSON.stringify(accessToken)};
     var msg = 'authorization:github:' + JSON.stringify({ token: token, provider: 'github' });
     var target = ${JSON.stringify(targetOrigin)};
-    var statusEl = document.createElement('p');
+    var debugMode = ${JSON.stringify(!!debug)};
+    var openerPresent = !!window.opener;
+    var statusEl = document.getElementById('pmStatus') || document.createElement('p');
     statusEl.id = 'pmStatus';
-    statusEl.textContent = 'Posting message to ' + target;
-    document.body.appendChild(statusEl);
+    statusEl.textContent = 'Preparing postMessage. opener=' + openerPresent + ', target=' + (debugMode ? '*' : target);
+    if (!document.getElementById('pmStatus')) document.body.appendChild(statusEl);
+
+    var ack = false;
     function sendMessage() {
       if (window.opener) {
-        window.opener.postMessage(msg, target);
-        statusEl.textContent = 'postMessage sent to ' + target;
+        window.opener.postMessage(msg, debugMode ? '*' : target);
+        statusEl.textContent = 'postMessage sent to ' + (debugMode ? '*' : target);
+      } else {
+        statusEl.textContent = 'No window.opener available to postMessage.';
       }
     }
-    window.postMessageAgain = sendMessage;
+
+    window.addEventListener('message', function(ev) {
+      if (ev && typeof ev.data === 'string' && ev.data === 'authorization:github:ack') {
+        ack = true;
+        statusEl.textContent = 'ACK received from opener.';
+        if (!debugMode) {
+          setTimeout(function(){ window.close(); }, 250);
+        }
+      }
+    });
+
     sendMessage();
-    if (!${JSON.stringify(!!debug)}) {
-      setTimeout(function(){ window.close(); }, 250);
-    }
+    setTimeout(function() {
+      if (!ack) {
+        statusEl.textContent = 'No ACK received yet.';
+      }
+    }, 1500);
+
+    var resendBtn = document.getElementById('resendBtn');
+    if (resendBtn) resendBtn.onclick = sendMessage;
+    var closeBtn = document.getElementById('closeBtn');
+    if (closeBtn) closeBtn.onclick = function(){ window.close(); };
   })();
 </script>
 </body>
