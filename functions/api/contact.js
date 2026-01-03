@@ -2,9 +2,9 @@ const RATE_LIMIT_WINDOW_SECONDS = 10 * 60; // 10 minutes
 const RATE_LIMIT_MAX = 5;
 const memoryRateMap = new Map();
 
-const jsonResponse = (body, status = 200) => new Response(JSON.stringify(body), {
+const jsonResponse = (body, status = 200, extraHeaders = {}) => new Response(JSON.stringify(body), {
   status,
-  headers: { 'content-type': 'application/json' }
+  headers: { 'content-type': 'application/json', ...extraHeaders }
 });
 
 const getClientIp = (request) => {
@@ -110,6 +110,9 @@ const sendEmail = async ({ name, phone, message, clientIp }, env) => {
 
     if (!res.ok) {
       const errorText = await res.text();
+      if (res.status === 403 && (errorText || '').toLowerCase().includes('testing')) {
+        return { ok: false, error: 'Resend testing mode: set CONTACT_TO_EMAIL to your Resend account email for tests, or verify a domain in Resend and set CONTACT_FROM_EMAIL to that domain.' };
+      }
       return { ok: false, error: `Email provider error: ${errorText || res.statusText}` };
     }
   } catch (err) {
@@ -121,14 +124,17 @@ const sendEmail = async ({ name, phone, message, clientIp }, env) => {
 
 export const onRequest = async (context) => {
   const { request, env } = context;
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  };
+
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
   if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ ok: false, error: 'Method Not Allowed' }), {
-      status: 405,
-      headers: {
-        'content-type': 'application/json',
-        'Allow': 'POST'
-      }
-    });
+    return jsonResponse({ ok: false, error: 'Method Not Allowed' }, 405, { ...corsHeaders, Allow: 'POST' });
   }
 
   const body = await parseBody(request);
@@ -139,32 +145,32 @@ export const onRequest = async (context) => {
   const honeypot = (body.company || body.website || body.honeypot || '').toString().trim();
 
   if (honeypot) {
-    return jsonResponse({ ok: false, error: 'Invalid submission' }, 400);
+    return jsonResponse({ ok: false, error: 'Invalid submission' }, 400, corsHeaders);
   }
 
   if (!name || !phone || !message) {
-    return jsonResponse({ ok: false, error: 'Missing required fields.' }, 400);
+    return jsonResponse({ ok: false, error: 'Missing required fields.' }, 400, corsHeaders);
   }
 
   if (name.length > 120 || phone.length > 120 || message.length < 5 || message.length > 5000) {
-    return jsonResponse({ ok: false, error: 'Field validation failed.' }, 400);
+    return jsonResponse({ ok: false, error: 'Field validation failed.' }, 400, corsHeaders);
   }
 
   const clientIp = getClientIp(request);
   const isRateLimited = await checkRateLimit(clientIp, env);
   if (isRateLimited) {
-    return jsonResponse({ ok: false, error: 'Too many requests. Please wait and try again.' }, 429);
+    return jsonResponse({ ok: false, error: 'Too many requests. Please wait and try again.' }, 429, corsHeaders);
   }
 
   const turnstileResult = await verifyTurnstile(turnstileToken, clientIp, env.TURNSTILE_SECRET_KEY);
   if (!turnstileResult.success) {
-    return jsonResponse({ ok: false, error: 'Spam verification failed.' }, 400);
+    return jsonResponse({ ok: false, error: 'Spam verification failed.' }, 400, corsHeaders);
   }
 
   const emailResult = await sendEmail({ name, phone, message, clientIp }, env);
   if (!emailResult.ok) {
-    return jsonResponse({ ok: false, error: emailResult.error || 'Unable to send message.' }, 500);
+    return jsonResponse({ ok: false, error: emailResult.error || 'Unable to send message.' }, 500, corsHeaders);
   }
 
-  return jsonResponse({ ok: true });
+  return jsonResponse({ ok: true }, 200, corsHeaders);
 };
