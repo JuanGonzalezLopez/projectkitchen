@@ -1,20 +1,20 @@
 # Project Kitchen
 
-Static, JSON-driven marketing site for a remodeling business. Hosted on Cloudflare Pages with Pages Functions for secure contact handling, Turnstile spam protection, and Decap CMS editing.
+Static, JSON-driven marketing site for a remodeling business. Hosted on Cloudflare Pages with Pages Functions for secure contact handling, Turnstile spam protection, and a custom Cloudflare-Access-protected admin panel that commits content directly to GitHub.
 
 ## Hosting (Cloudflare Pages)
 - Build command: none (static site).
 - Output directory: `/`.
-- Functions: `/functions` (contact form, Turnstile public config, GitHub OAuth).
+- Functions live in `/functions` (contact form, public config, admin endpoints).
 - Set `siteUrl` in `data/content.json` to your Pages or custom domain so canonical, OG, and JSON-LD stay correct.
 
 ## Content architecture
-- `data/content.json` — hero/about/contact copy, `siteUrl`, optional `turnstileSiteKey` fallback.
+- `data/content.json` — hero/about/contact copy, `siteUrl`, optional `turnstileSiteKey`.
 - `data/services.json` — services grid items.
 - `data/projects.json` — project list with manifest paths and base paths.
 - `assets/projects/<slug>/manifest.json` — per-project details plus image lists (supports `webp`).
-- `admin/` — Decap CMS entry point and configuration.
-- `assets/uploads/` — default media bucket for CMS uploads.
+- `assets/uploads/` — default media bucket for admin uploads.
+- `admin/` — custom admin panel (no Decap).
 
 ## Local development
 - Static preview: `python3 -m http.server 8000` from the repo root. JSON fetches work; `/api` Functions are not available, so the contact form will show an error state.
@@ -27,47 +27,43 @@ Static, JSON-driven marketing site for a remodeling business. Hosted on Cloudfla
 - JSON responses: `200 { ok: true }`, `400/429/500 { ok: false, error: "<message>" }`.
 - Static local preview will report an error because Functions are not running; deploy or run `wrangler pages dev` to exercise the endpoint.
 
+## Admin panel (Cloudflare Access + GitHub commits)
+- Custom admin lives at `/admin` (plain HTML/JS, protected by Cloudflare Access).
+- Edits and saves:
+  - `data/content.json`
+  - `data/services.json`
+  - `data/projects.json`
+  - `assets/projects/<slug>/manifest.json`
+- Uploads images to `assets/uploads/` or `assets/projects/<slug>/`.
+- All changes are committed to GitHub via Pages Functions under `/api/admin/*`.
+- Call `/api/admin/status` to verify auth; the UI shows “Auth OK” when Access headers are present.
+
 ## Environment variables (Cloudflare Pages)
-- Required: `TURNSTILE_SECRET_KEY`, `EMAIL_API_KEY` (Resend), `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`.
-- Turnstile public key: `TURNSTILE_SITE_KEY` (used by `/api/public-config` and rendered on the form).
+- Contact/Turnstile: `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `EMAIL_API_KEY` (Resend), `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`.
+- GitHub (admin commits): `GITHUB_TOKEN` (fine-grained PAT scoped to this repo), `GITHUB_REPO` (e.g., JuanGonzalezLopez/projectkitchen), `GITHUB_BRANCH` (main).
+- Admin auth: `CF_ACCESS_TEAM_DOMAIN`, `CF_ACCESS_AUD`, `ADMIN_EMAIL_ALLOWLIST` (comma-separated).
+- Optional fallback basic auth: `ADMIN_BASIC_USER`, `ADMIN_BASIC_PASS`.
 - Optional: `RATE_LIMIT_KV` binding for persistent IP rate limiting.
 - Redeploy after editing environment variables so Functions receive the updates.
 
-## Turnstile setup
-1) Create a Turnstile widget in the Cloudflare dashboard.  
-2) Add the site key and secret key as environment variables in Cloudflare Pages (Production + Preview).  
-3) Optionally set `turnstileSiteKey` in `data/content.json` as a public fallback.
+## Cloudflare Access setup for /admin
+1) In Cloudflare Zero Trust → Access → Applications, create a Self-hosted app:
+   - Application domain: your site (e.g., projectkitchen.pages.dev)
+   - Session duration: your preference
+   - Policy: Include emails in `ADMIN_EMAIL_ALLOWLIST`
+   - Set AUD value; copy it to `CF_ACCESS_AUD`
+2) Note your team domain (e.g., `yourteam.cloudflareaccess.com`) and set `CF_ACCESS_TEAM_DOMAIN`.
+3) Deploy; `/admin` will show “Auth OK” when Access headers are present.
 
-## Email provider (Resend)
-- Verify a domain/sender in Resend and use the API key in `EMAIL_API_KEY`.
-- Set `CONTACT_FROM_EMAIL` (verified sender) and `CONTACT_TO_EMAIL` (recipient).
-- Resend is called directly via REST in `functions/api/contact.js`; no npm dependency is needed.
-
-## Decap CMS (Git-based)
-- Admin UI lives at `/admin`. Drag-and-drop uploads are saved to `assets/projects/<slug>` (for manifests) or `assets/uploads`.
-- Collections: `data/content.json`, `data/services.json`, `data/projects.json`, and `assets/projects/**/manifest.json`.
-- Adding a project via CMS: upload images into a new slug folder, create/edit its manifest in “Project Manifests,” then add the slug entry in “Projects Index.”
-- Decap CMS is vendored locally at `admin/decap-cms.js` to avoid third-party script CDNs and work with a strict CSP.
-- `/admin` uses a route-scoped CSP that allows `unsafe-eval` (required by Decap); the public site CSP remains strict without `unsafe-eval`.
-- CSP is applied via `functions/_middleware.js` to ensure a single policy per response (admin vs public) and avoid merged headers on Cloudflare Pages.
-- OAuth debug: open `https://projectkitchen.pages.dev/api/auth?debug=1` to render the debug page and keep the popup open; Cloudflare Pages logs include step-by-step auth details (redacted codes/tokens).
-
-### Troubleshooting Decap OAuth
-- Confirm the OAuth App callback is `https://projectkitchen.pages.dev/api/auth`.
-- Visit `/api/auth?debug=1` to see the computed origin/redirect and keep the popup open; use “PostMessage again” if needed.
-- Visit `/admin/?debug_oauth=1` before logging in to auto-ACK the popup message and surface debug logs in the console (token suffix only).
-- Check Cloudflare Pages Function logs for `[auth]` entries (state match, token status, truncated bodies).
-- If GitHub rate limits the flow, wait and retry from `/api/auth?provider=github&site_id=projectkitchen.pages.dev&scope=repo&debug=1`.
-- GitHub OAuth flow is handled by `/api/auth` (Pages Function):
-  1) Create a GitHub OAuth App with Homepage URL = your site and Authorization callback URL = `<siteUrl>/api/auth`.
-  2) Set `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` in Cloudflare Pages.
-  3) Update `admin/config.yml` `base_url` to your deployed domain.
-  4) Deploy and log in through the CMS popup.
+## Admin usage
+- Open `/admin` (after Access auth). Status badge should show “Auth OK”.
+- Edit Site Content, Services, Projects, or a selected Project Manifest; click Save to commit to GitHub.
+- Upload images via the Media tab to `assets/uploads/` or a specific project folder; use returned paths in manifests.
 
 ## Security
-- `_headers` enforces CSP, `frame-ancestors 'none'`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Content-Type-Options: nosniff`, and a restrictive Permissions-Policy; `/admin` uses a slightly more permissive CSP for CMS assets.
+- `_headers` plus `functions/_middleware.js` apply CSP, `frame-ancestors 'none'`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Content-Type-Options: nosniff`, and Permissions-Policy.
+- Admin writes are gated by Cloudflare Access (plus optional basic auth), path allowlists, file-type/size checks, and rate limiting; secrets stay in environment variables.
 - Contact flow adds Turnstile + honeypot + rate limiting; without a KV binding, rate limiting is per-instance (best-effort).
-- Secrets stay in environment variables; only the public Turnstile key is exposed via `/api/public-config`.
 
 ## Domain readiness & SEO
 - Canonical link, `og:url`, and JSON-LD use `siteUrl` from `data/content.json`; `og:image` falls back to the first project image.
@@ -78,7 +74,8 @@ Static, JSON-driven marketing site for a remodeling business. Hosted on Cloudfla
 - Production deploy targets Cloudflare Pages (free tier) with no build step and output `/`.
 
 ## Testing checklist
-- Visit `/admin/` to confirm Decap CMS loads; log in with GitHub and ensure auth completes.
-- Create/edit content via CMS and verify commits land in the repo.
+- Visit `/admin/` to confirm Access-protected admin loads and status reads “Auth OK”.
+- Edit/save content and verify commits land in GitHub.
+- Upload a sample image and confirm the returned path is usable.
 - Submit the contact form (with Turnstile) and confirm the Resend email is delivered.
 - Confirm `/api/public-config` returns the public Turnstile key and `/api/contact` returns JSON statuses.
