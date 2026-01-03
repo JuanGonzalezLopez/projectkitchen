@@ -50,6 +50,7 @@ Static, JSON-driven marketing site for a remodeling business. Hosted on Cloudfla
 - Decap CMS is vendored locally at `admin/decap-cms.js` to avoid third-party script CDNs and work with a strict CSP.
 - `/admin` uses a route-scoped CSP that allows `unsafe-eval` (required by Decap); the public site CSP remains strict without `unsafe-eval`.
 - CSP is applied via `functions/_middleware.js` to ensure a single policy per response (admin vs public) and avoid merged headers on Cloudflare Pages.
+- OAuth debug: open `https://projectkitchen.pages.dev/api/auth?debug=1` to render the debug page and keep the popup open; Cloudflare Pages logs include step-by-step auth details (redacted codes/tokens).
 - GitHub OAuth flow is handled by `/api/auth` (Pages Function):
   1) Create a GitHub OAuth App with Homepage URL = your site and Authorization callback URL = `<siteUrl>/api/auth`.
   2) Set `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` in Cloudflare Pages.
