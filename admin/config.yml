@@ -3,7 +3,7 @@ backend:
   repo: JuanGonzalezLopez/projectkitchen
   branch: main
   base_url: https://projectkitchen.pages.dev
-  auth_endpoint: /api/auth
+  auth_endpoint: https://projectkitchen.pages.dev/api/auth
 
 site_url: https://projectkitchen.pages.dev
 media_folder: assets/uploads
